@@ -66,3 +66,38 @@
     outline: none;
     box-shadow: 0 0 0 2px rgba(56,189,248,.4);
 }
+
+/* TOMBOL KEMBALI */
+.btn-secondary-outline {
+    background-color: transparent;
+    color: #6c757d;              /* secondary */
+    border: 1px solid #6c757d;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                border-color 0.2s ease-in-out,
+                transform 0.1s ease-in-out;
+}
+
+/* hover → abu solid + teks putih */
+.btn-secondary-outline:hover {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+/* active (klik ditekan) → lebih pekat */
+.btn-secondary-outline:active {
+    background-color: #5a6268;   /* secondary lebih gelap */
+    border-color: #5a6268;
+    color: #ffffff;
+    transform: scale(0.96);
+}
+
+/* fokus keyboard */
+.btn-secondary-outline:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.35);
+}

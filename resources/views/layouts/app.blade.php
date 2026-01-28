@@ -40,7 +40,7 @@
 
         <!-- Main Content -->
         <main class="flex-1 p-8 bg-slate-100">
-        {{ $slot }}
+        @yield('content')
         </main>
 
 
