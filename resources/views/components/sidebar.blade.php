@@ -25,23 +25,34 @@
     <!-- Menu -->
     <nav class="flex-1 px-3 mt-2 space-y-1">
 
-        <a href="{{ route('dashboard') }}"
+    {{-- DASHBOARD --}}
+    <a href="{{ route('dashboard') }}"
+       class="flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200
+       {{ request()->routeIs('dashboard')
+            ? 'bg-blue-600 shadow-lg shadow-blue-600/30'
+            : 'hover:bg-slate-700' }}">
+        🏠 Dashboard
+    </a>
+
+    {{-- DATA LITMAS --}}
+    <a href="{{ route('litmas.index') }}"
+       class="flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200
+       {{ request()->routeIs('litmas.*')
+            ? 'bg-blue-600 shadow-lg shadow-blue-600/30'
+            : 'hover:bg-slate-700' }}">
+        📄 Data Litmas
+    </a>
+
+    {{-- MANAJEMEN USER (HANYA ADMIN) --}}
+    @if(auth()->user()->role === 'admin')
+        <a href="{{ route('users.index') }}"
            class="flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200
-           {{ request()->routeIs('dashboard')
+           {{ request()->routeIs('users.*')
                 ? 'bg-blue-600 shadow-lg shadow-blue-600/30'
                 : 'hover:bg-slate-700' }}">
-            🏠 Dashboard
-        </a>
-
-        <a href="#"
-           class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-slate-700 transition">
-            📄 Data Litmas
-        </a>
-
-        <a href="#"
-           class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-slate-700 transition">
             👤 Manajemen User
         </a>
+    @endif
 
     </nav>
 
