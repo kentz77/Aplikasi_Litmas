@@ -13,71 +13,82 @@ use App\Http\Controllers\ClientController;
 |--------------------------------------------------------------------------
 */
 
-// Root → arahkan ke login (bukan langsung view)
+// Root
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Dashboard (wajib login)
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware('auth')
-    ->name('dashboard');
-
-// Menambahkan Litmas
-Route::get('/litmas/create', [LitmasController::class, 'create'])
-    ->name('litmas.create');
-
-Route::post('/litmas', [LitmasController::class, 'store'])
-    ->name('litmas.store');
-
-Route::get('/litmas', [LitmasController::class, 'index'])
-    ->name('litmas.index');
-
-// Profile routes (Breeze default)
+// ========================
+// SEMUA USER LOGIN
+// ========================
 Route::middleware('auth')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-// Admin & Super User
-Route::middleware(['auth', 'role:admin,superuser'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-         ->name('dashboard');
+
+    // Litmas
+    Route::get('/litmas', [LitmasController::class, 'index'])
+        ->name('litmas.index');
+
+    Route::get('/litmas/create', [LitmasController::class, 'create'])
+        ->name('litmas.create');
+
+    Route::post('/litmas', [LitmasController::class, 'store'])
+        ->name('litmas.store');
+        
+    // client
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
     Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
     Route::get('/clients/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
     Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
+});
+
+// ========================
+// USER BIASA
+// ========================
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/litmas-saya', [LitmasController::class, 'myLitmas'])
+        ->name('litmas.my');
+});
+
+// ========================
+// HANYA ADMIN
+// ========================
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    Route::get('/manajemen-user', [UserController::class, 'index'])
+        ->name('users.index');
+
+    Route::get('/manajemen-user/create', [UserController::class, 'create'])
+        ->name('users.create');
+
+    Route::post('/manajemen-user', [UserController::class, 'store'])
+        ->name('users.store');
+
+    Route::get('/manajemen-user/{user}/edit', [UserController::class, 'edit'])
+        ->name('users.edit');
+
+    Route::put('/manajemen-user/{user}', [UserController::class, 'update'])
+        ->name('users.update');
+
+    Route::delete('/manajemen-user/{user}', [UserController::class, 'destroy'])
+        ->name('users.destroy');
+
+    Route::post('/manajemen-user/{user}/reset-password', [UserController::class, 'resetPassword'])
+        ->name('users.reset-password');
+
     Route::delete('/clients/{id}', [ClientController::class, 'destroy'])
         ->name('clients.destroy');
 });
 
-// Super User saja
-Route::middleware(['auth', 'role:superuser'])->group(function () {
-    Route::get('/manajemen-user', [UserController::class, 'index']);
-});
 
-// User biasa
-Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/litmas-saya', [LitmasController::class, 'myLitmas']);
-    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
-    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
-    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
-    Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
-    Route::get('/clients/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
-    Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
-});
-
-// ========================
-// PROFILE (SEMUA ROLE LOGIN)
-// ========================
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-});
-
-// Auth routes (login, logout, register, dll)
+// Auth routes
 require __DIR__.'/auth.php';
