@@ -40,7 +40,7 @@
 
         <select name="per_page"
                 onchange="this.form.submit()"
-                class="px-3 py-2 border rounded-lg">
+                class="px-3 py-2 pr-8 border rounded-lg">
             @foreach([10,15,20,30,50] as $size)
                 <option value="{{ $size }}" {{ $perPage == $size ? 'selected' : '' }}>
                     {{ $size }}
