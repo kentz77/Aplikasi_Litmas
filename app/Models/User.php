@@ -39,4 +39,10 @@ class User extends Authenticatable
     {
         return 'username';
     }
+
+    public function clients()
+{
+    return $this->hasMany(Client::class);
+}
+
 }
