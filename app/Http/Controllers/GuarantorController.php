@@ -5,72 +5,159 @@ namespace App\Http\Controllers;
 use App\Models\Guarantor;
 use App\Models\Client;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class GuarantorController extends Controller
 {
+
     /**
-     * Ambil data klien untuk dropdown form
+     * FORM TAMBAH
+     * tampilkan halaman + dropdown klien
      */
     public function create()
     {
-        $clients = Client::select('id', 'nama')->orderBy('nama')->get();
+        $clients = Client::orderBy('nama')->get();
 
-        return response()->json([
-            'clients' => $clients
-        ]);
+        return view('penjamin.create', compact('clients'));
     }
 
+
     /**
-     * Simpan penjamin milik klien
+     * SIMPAN BANYAK PENJAMIN SEKALIGUS
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'client_id' => 'required|exists:clients,id',
-            'no_kk' => 'required|numeric',
-            'nama' => 'required|string',
-            'tempat_lahir' => 'required|string',
-            'tanggal_lahir' => 'required|date',
-            'agama' => 'required|string',
-            'suku' => 'required|string',
-            'kewarganegaraan' => 'required|string',
-            'pendidikan_terakhir' => 'required|string',
-            'pekerjaan' => 'required|string',
-            'alamat' => 'required|string',
-            'hubungan_keluarga' => 'required|in:Ayah Kandung,Ibu Kandung,Saudara Kandung,Suami,Istri',
-            'usia' => 'nullable|string'
+            'penjamin.*.nama' => 'required|string',
+            'penjamin.*.tanggal_lahir' => 'required|date',
+            'penjamin.*.hubungan_keluarga' => 'required|in:Ayah Kandung,Ibu Kandung,Saudara Kandung,Suami,Istri'
         ]);
 
-        // otomatis terhubung ke klien
-        $client = Client::findOrFail($validated['client_id']);
+        foreach ($request->penjamin as $i => $data) {
 
-        $guarantor = $client->guarantors()->create($validated);
+            // VALIDASI UMUR >= 18
+            $umur = Carbon::parse($data['tanggal_lahir'])->age;
 
-        return response()->json([
-            'message' => 'Penjamin berhasil ditambahkan ke klien',
-            'client' => $client->nama,
-            'data' => $guarantor->load('client')
-        ], 201);
+            if ($umur < 18) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        "penjamin.$i.tanggal_lahir" => "Penjamin minimal berusia 18 tahun"
+                    ]);
+            }
+
+            Guarantor::create([
+                'client_id' => $request->client_id,
+                'no_kk' => $data['no_kk'] ?? null,
+                'nama' => $data['nama'],
+                'tempat_lahir' => $data['tempat_lahir'] ?? null,
+                'tanggal_lahir' => $data['tanggal_lahir'],
+                'agama' => $data['agama'] ?? null,
+                'suku' => $data['suku'] ?? null,
+                'kewarganegaraan' => $data['kewarganegaraan'] ?? null,
+                'pendidikan_terakhir' => $data['pendidikan_terakhir'] ?? null,
+                'pekerjaan' => $data['pekerjaan'] ?? null,
+                'alamat' => $data['alamat'] ?? null,
+                'hubungan_keluarga' => $data['hubungan_keluarga'],
+            ]);
+        }
+
+        return redirect()->route('penjamin.create')
+            ->with('success', 'Data penjamin berhasil disimpan');
     }
 
+
     /**
-     * Lihat semua penjamin milik klien tertentu
+     * FORM EDIT (1 klien → banyak penjamin)
+     */
+    public function edit(Client $client)
+    {
+        $penjamins = Guarantor::where('client_id', $client->id)->get();
+
+        return view('penjamin.edit', compact('client', 'penjamins'));
+    }
+
+
+    /**
+     * UPDATE MASSAL (create + update + delete)
+     */
+    public function update(Request $request, Client $client)
+    {
+        $request->validate([
+            'penjamin.*.nama' => 'required|string',
+            'penjamin.*.tanggal_lahir' => 'required|date',
+            'penjamin.*.hubungan_keluarga' => 'required|in:Ayah Kandung,Ibu Kandung,Saudara Kandung,Suami,Istri'
+        ]);
+
+        $existingIds = Guarantor::where('client_id', $client->id)->pluck('id')->toArray();
+        $sentIds = [];
+
+        foreach ($request->penjamin as $i => $data) {
+
+            // VALIDASI UMUR
+            $umur = Carbon::parse($data['tanggal_lahir'])->age;
+            if ($umur < 18) {
+                return back()->withInput()
+                    ->withErrors([
+                        "penjamin.$i.tanggal_lahir" => "Penjamin minimal 18 tahun"
+                    ]);
+            }
+
+            // UPDATE
+            if (isset($data['id']) && in_array($data['id'], $existingIds)) {
+
+                $g = Guarantor::find($data['id']);
+                $g->update($data);
+                $sentIds[] = $g->id;
+            }
+            // CREATE BARU
+            else {
+
+                $g = Guarantor::create([
+                    'client_id' => $client->id,
+                    'no_kk' => $data['no_kk'] ?? null,
+                    'nama' => $data['nama'],
+                    'tempat_lahir' => $data['tempat_lahir'] ?? null,
+                    'tanggal_lahir' => $data['tanggal_lahir'],
+                    'agama' => $data['agama'] ?? null,
+                    'suku' => $data['suku'] ?? null,
+                    'kewarganegaraan' => $data['kewarganegaraan'] ?? null,
+                    'pendidikan_terakhir' => $data['pendidikan_terakhir'] ?? null,
+                    'pekerjaan' => $data['pekerjaan'] ?? null,
+                    'alamat' => $data['alamat'] ?? null,
+                    'hubungan_keluarga' => $data['hubungan_keluarga'],
+                ]);
+
+                $sentIds[] = $g->id;
+            }
+        }
+
+        // HAPUS YANG DIHILANGKAN DI FORM
+        $deleteIds = array_diff($existingIds, $sentIds);
+        Guarantor::destroy($deleteIds);
+
+        return redirect()->route('penjamin.edit', $client->id)
+            ->with('success', 'Data penjamin berhasil diperbarui');
+    }
+
+
+    /**
+     * LIST PENJAMIN PER KLIEN (optional untuk AJAX tabel)
      */
     public function byClient($client_id)
     {
         $client = Client::with('guarantors')->findOrFail($client_id);
-
-        return response()->json([
-            'client' => $client->nama,
-            'guarantors' => $client->guarantors
-        ]);
+        return view('penjamin.partials.table', compact('client'));
     }
 
+
     /**
-     * Detail penjamin
+     * DETAIL PENJAMIN
      */
     public function show($id)
     {
-        return Guarantor::with('client')->findOrFail($id);
+        $guarantor = Guarantor::with('client')->findOrFail($id);
+        return view('penjamin.show', compact('guarantor'));
     }
 }
