@@ -27,14 +27,14 @@
 
 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
 
-{{-- SEARCH --}}
-<form method="GET" class="mb-4">
-    <input type="text" name="search" value="{{ request('search') }}"
-           placeholder="Cari nama / username..."
-           class="px-3 py-2 border rounded-lg w-64">
-</form>
+    {{-- SEARCH --}}
+    <form method="GET">
+        <input type="text" name="search" value="{{ request('search') }}"
+               placeholder="Cari nama / username..."
+               class="px-3 py-2 border rounded-lg w-64">
+    </form>
 
-<!-- PER PAGE -->
+    {{-- PER PAGE --}}
     <form method="GET">
         <input type="hidden" name="search" value="{{ $search }}">
 
@@ -66,24 +66,40 @@
 
         <tbody>
             @forelse ($users as $user)
+
+                @php
+                    // Ambil role dari Spatie
+                    $role = $user->getRoleNames()->first();
+                @endphp
+
                 <tr class="border-t hover:bg-gray-50">
-                    <td class="px-4 py-3">{{ $loop->iteration }}</td>
+                    <td class="px-4 py-3">
+                        {{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}
+                    </td>
+
                     <td class="px-4 py-3">{{ $user->name }}</td>
                     <td class="px-4 py-3">{{ $user->username }}</td>
 
                     {{-- BADGE ROLE --}}
                     <td class="px-4 py-3">
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full
-                            @if($user->role === 'admin') bg-red-100 text-red-700
-                            @elseif($user->role === 'superuser') bg-yellow-100 text-yellow-700
-                            @else bg-green-100 text-green-700
-                            @endif">
-                            {{ ucfirst($user->role) }}
-                        </span>
+                        @if($role)
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                @if($role === 'admin') bg-red-100 text-red-700
+                                @elseif($role === 'superuser') bg-yellow-100 text-yellow-700
+                                @else bg-green-100 text-green-700
+                                @endif">
+                                {{ ucfirst($role) }}
+                            </span>
+                        @else
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
+                                Tidak ada role
+                            </span>
+                        @endif
                     </td>
 
                     {{-- AKSI --}}
-                    <td class="px-4 py-3 flex gap-3">
+                    <td class="px-4 py-3 flex gap-3 items-center">
+
                         {{-- EDIT --}}
                         <a href="{{ route('users.edit', $user) }}"
                            class="text-blue-600 hover:underline">
@@ -101,7 +117,7 @@
                             </button>
                         </form>
 
-                        {{-- DELETE (TIDAK BOLEH HAPUS DIRI SENDIRI) --}}
+                        {{-- DELETE --}}
                         @if(auth()->id() !== $user->id)
                             <form method="POST"
                                   action="{{ route('users.destroy', $user) }}"
@@ -118,8 +134,10 @@
                                 (Akun sendiri)
                             </span>
                         @endif
+
                     </td>
                 </tr>
+
             @empty
                 <tr>
                     <td colspan="5"

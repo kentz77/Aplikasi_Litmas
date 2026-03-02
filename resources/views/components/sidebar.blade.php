@@ -34,6 +34,16 @@
         🏠 Dashboard
     </a>
 
+    {{-- PASAL --}}
+    <a href="{{ route('pasal.index') }}"
+    class="flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200
+    {{ request()->routeIs('pasal.*')
+            ? 'bg-blue-600 shadow-lg shadow-blue-600/30'
+            : 'hover:bg-slate-700' }}">
+        
+        📜 Pasal
+    </a>
+
     {{-- DATA LITMAS --}}
     <a href="{{ route('litmas.index') }}"
        class="flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200
@@ -53,7 +63,7 @@
     </a>
 
     {{-- MANAJEMEN USER (HANYA ADMIN) --}}
-    @if(auth()->user()->role === 'admin')
+   @if(auth()->user()->hasRole('admin'))
         <a href="{{ route('users.index') }}"
            class="flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200
            {{ request()->routeIs('users.*')
