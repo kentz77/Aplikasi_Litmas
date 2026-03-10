@@ -50,15 +50,19 @@
                 autocomplete="off"
             >
 
-            {{-- CLEAR BUTTON --}}
+            <!-- CLEAR BUTTON -->
             <button
                 type="button"
                 id="clearBtn"
                 onclick="clearSearch()"
-                class="hidden absolute right-3 top-1/2 -translate-y-1/2
-                       h-6 w-6 flex items-center justify-center
-                       rounded-full text-gray-400
-                       hover:bg-gray-200 hover:text-red-500">
+                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);"
+                class="hidden
+                    h-6 w-6
+                    flex items-center justify-center
+                    rounded-full
+                    text-gray-400
+                    hover:bg-gray-200 hover:text-red-500"
+            >
                 ✕
             </button>
 
@@ -114,7 +118,6 @@
         <tbody class="divide-y">
 
         @forelse ($pasals as $pasal)
-
             <tr class="hover:bg-gray-50">
 
                 {{-- NOMOR --}}
@@ -138,21 +141,15 @@
                 {{-- DAFTAR AYAT --}}
                 <td class="px-4 py-3">
 
-                    @if($pasal->ayats->count())
+                    @if($pasal->ayats->isNotEmpty())
 
                         <div class="flex flex-wrap gap-2">
 
-                            @foreach($pasal->ayats->take(3) as $ayat)
+                            @foreach($pasal->ayats as $ayat)
                                 <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
                                     Ayat ({{ $ayat->nomor_ayat }})
                                 </span>
                             @endforeach
-
-                            @if($pasal->ayats->count() > 3)
-                                <span class="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-full">
-                                    +{{ $pasal->ayats->count() - 3 }} lainnya
-                                </span>
-                            @endif
 
                         </div>
 
@@ -162,7 +159,7 @@
                         </span>
                     @endif
 
-                </td>
+                    </td>
 
 
                 {{-- AKSI --}}

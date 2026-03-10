@@ -9,16 +9,18 @@ class Pasal extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nomor_pasal', 'klasifikasi_hukum_id'];
+    protected $fillable = [
+        'nomor_pasal',
+        'klasifikasi_hukum_id'
+    ];
 
     public function ayats()
     {
-        return $this->hasMany(Ayat::class);
+        return $this->hasMany(Ayat::class, 'pasal_id', 'id');
     }
 
-    // relasi ke klasifikasi hukum
     public function klasifikasiHukum()
     {
-        return $this->belongsTo(KlasifikasiHukum::class);
+        return $this->belongsTo(KlasifikasiHukum::class, 'klasifikasi_hukum_id');
     }
 }

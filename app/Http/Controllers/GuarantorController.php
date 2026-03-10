@@ -199,4 +199,15 @@ class GuarantorController extends Controller
 
     return view('penjamin.show', compact('penjamin'));
 }
+
+    // Hapus
+    public function destroy($id)
+    {
+        $penjamin = Guarantor::findOrFail($id);
+        $penjamin->delete();
+
+        return redirect()
+            ->route('penjamin.index')
+            ->with('success', 'Data penjamin berhasil dihapus');
+    }
 }

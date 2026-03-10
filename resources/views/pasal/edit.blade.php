@@ -16,7 +16,8 @@
         </a>
     </div>
 
-    {{-- ERROR --}}
+
+    {{-- ERROR VALIDATION --}}
     @if ($errors->any())
         <div class="mb-4 p-3 rounded bg-red-100 text-red-700">
             <ul class="list-disc list-inside">
@@ -27,100 +28,152 @@
         </div>
     @endif
 
+
     {{-- FORM --}}
-    <form action="{{ route('pasal.update', $pasal->id) }}" method="POST">
+    <form action="{{ route('pasal.update',$pasal->id) }}" method="POST">
         @csrf
         @method('PUT')
+
 
         {{-- DATA PASAL --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
+            {{-- NOMOR PASAL --}}
             <div>
-                <label class="block font-semibold mb-1">Nomor Pasal</label>
-                <input type="text"
-                       name="nomor_pasal"
-                       value="{{ old('nomor_pasal', $pasal->nomor_pasal) }}"
-                       class="w-full border rounded px-3 py-2"
-                       required>
+                <label class="block font-semibold mb-1">
+                    Nomor Pasal
+                </label>
+
+                <input
+                    type="text"
+                    name="nomor_pasal"
+                    value="{{ old('nomor_pasal',$pasal->nomor_pasal) }}"
+                    class="w-full border rounded px-3 py-2"
+                    required
+                >
             </div>
 
+
+            {{-- KLASIFIKASI HUKUM --}}
             <div>
-                <label class="block font-semibold mb-1">Judul</label>
-                <input type="text"
-                       name="judul"
-                       value="{{ old('judul', $pasal->judul) }}"
-                       class="w-full border rounded px-3 py-2">
+                <label>Klasifikasi Hukum</label>
+
+                <input
+                    type="hidden"
+                    name="klasifikasi_hukum_id"
+                    value="{{ $pasal->klasifikasi_hukum_id }}"
+                >
+
+                <input
+                    type="text"
+                    name="klasifikasi_hukum"
+                    value="{{ old('klasifikasi_hukum', $pasal->klasifikasiHukum->nama_klasifikasi ?? '') }}"
+                    class="border p-2 w-full"
+                >
             </div>
 
         </div>
 
+
         <hr class="my-6">
 
-        {{-- AYAT --}}
+
+        {{-- AYAT WRAPPER --}}
         <div id="ayat-wrapper">
 
             @foreach($pasal->ayats as $i => $ayat)
-                <div class="ayat-item border rounded p-4 mb-4">
 
-                    <h3 class="ayat-title font-bold text-lg mb-3">
-                        Ayat {{ $loop->iteration }}
-                    </h3>
+            <div class="ayat-item border rounded p-4 mb-4">
 
-                    {{-- Hidden ID --}}
-                    <input type="hidden"
-                           name="ayat[{{ $i }}][id]"
-                           value="{{ $ayat->id }}">
+                <h3 class="ayat-title font-bold text-lg mb-3">
+                    Ayat {{ $loop->iteration }}
+                </h3>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- ID AYAT --}}
+                <input
+                    type="hidden"
+                    name="ayat[{{ $i }}][id]"
+                    value="{{ $ayat->id }}"
+                >
 
-                        <div>
-                            <label class="block font-semibold mb-1">Nomor Ayat</label>
-                            <input type="text"
-                                   name="ayat[{{ $i }}][nomor]"
-                                   value="{{ $ayat->nomor_ayat }}"
-                                   class="w-full border rounded px-3 py-2"
-                                   required>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                        <div class="md:col-span-2">
-                            <label class="block font-semibold mb-1">Isi Ayat</label>
-                            <textarea name="ayat[{{ $i }}][isi]"
-                                      rows="3"
-                                      class="w-full border rounded px-3 py-2"
-                                      required>{{ $ayat->isi }}</textarea>
-                        </div>
+                    {{-- NOMOR AYAT --}}
+                    <div>
+                        <label class="block font-semibold mb-1">
+                            Nomor Ayat
+                        </label>
+
+                        <input
+                            type="text"
+                            name="ayat[{{ $i }}][nomor_ayat]"
+                            value="{{ $ayat->nomor_ayat }}"
+                            class="w-full border rounded px-3 py-2"
+                            required
+                        >
+                    </div>
+
+
+                    {{-- ISI AYAT --}}
+                    <div class="md:col-span-2">
+
+                        <label class="block font-semibold mb-1">
+                            Isi Ayat
+                        </label>
+
+                        <textarea
+                            name="ayat[{{ $i }}][isi]"
+                            rows="3"
+                            class="w-full border rounded px-3 py-2"
+                            required
+                        >{{ $ayat->isi }}</textarea>
 
                     </div>
 
-                    <button type="button"
-                            onclick="hapusAyat(this)"
-                            class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
-                        Hapus Ayat
-                    </button>
-
                 </div>
+
+
+                {{-- BUTTON HAPUS --}}
+                <button
+                    type="button"
+                    onclick="hapusAyat(this)"
+                    class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                >
+                    Hapus Ayat
+                </button>
+
+            </div>
+
             @endforeach
 
         </div>
 
+
         {{-- BUTTON TAMBAH AYAT --}}
-        <button type="button"
-                onclick="tambahAyat()"
-                class="mb-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+        <button
+            type="button"
+            onclick="tambahAyat()"
+            class="mb-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        >
             + Tambah Ayat
         </button>
 
+
         {{-- BUTTON ACTION --}}
         <div class="flex justify-end gap-3">
+
             <a href="{{ route('pasal.index') }}"
                class="px-4 py-2 border rounded hover:bg-gray-100">
                 Batal
             </a>
 
-            <button type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <button
+                type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
                 Simpan Perubahan
             </button>
+
         </div>
 
     </form>
@@ -128,9 +181,18 @@
 </div>
 
 
+
+{{-- =========================
+    JAVASCRIPT DINAMIS
+========================= --}}
 <script>
+
 let index = {{ $pasal->ayats->count() }};
 
+
+/* =========================
+   TAMBAH AYAT
+========================= */
 function tambahAyat(){
 
     let html = `
@@ -141,42 +203,66 @@ function tambahAyat(){
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <div>
-                <label class="block font-semibold mb-1">Nomor Ayat</label>
-                <input type="text"
-                       name="ayat[${index}][nomor]"
-                       class="w-full border rounded px-3 py-2"
-                       required>
+                <label class="block font-semibold mb-1">
+                    Nomor Ayat
+                </label>
+
+                <input
+                    type="text"
+                    name="ayat[\${index}][nomor_ayat]"
+                    class="w-full border rounded px-3 py-2"
+                    required
+                >
             </div>
 
             <div class="md:col-span-2">
-                <label class="block font-semibold mb-1">Isi Ayat</label>
-                <textarea name="ayat[${index}][isi]"
-                          rows="3"
-                          class="w-full border rounded px-3 py-2"
-                          required></textarea>
+
+                <label class="block font-semibold mb-1">
+                    Isi Ayat
+                </label>
+
+                <textarea
+                    name="ayat[\${index}][isi]"
+                    rows="3"
+                    class="w-full border rounded px-3 py-2"
+                    required
+                ></textarea>
+
             </div>
 
         </div>
 
-        <button type="button"
-                onclick="hapusAyat(this)"
-                class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+        <button
+            type="button"
+            onclick="hapusAyat(this)"
+            class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+        >
             Hapus Ayat
         </button>
 
     </div>
     `;
 
-    document.getElementById('ayat-wrapper')
+    document
+        .getElementById('ayat-wrapper')
         .insertAdjacentHTML('beforeend', html);
 
     renumberAyat();
+
 }
 
+
+/* =========================
+   HAPUS AYAT
+========================= */
 function hapusAyat(btn){
+
     btn.closest('.ayat-item').remove();
+
     renumberAyat();
+
 }
+
 
 /* =========================
    AUTO RENUMBER AYAT
@@ -185,25 +271,31 @@ function renumberAyat(){
 
     const items = document.querySelectorAll('.ayat-item');
 
-    items.forEach((item, i) => {
+    items.forEach((item,i)=>{
 
         item.querySelector('.ayat-title')
             .innerText = 'Ayat ' + (i + 1);
 
-        item.querySelectorAll('input, textarea')
+        item.querySelectorAll('input,textarea')
             .forEach(el => {
-                if (el.name) {
+
+                if(el.name){
+
                     el.name = el.name.replace(
                         /ayat\[\d+\]/,
                         `ayat[${i}]`
                     );
+
                 }
+
             });
 
     });
 
     index = items.length;
+
 }
+
 </script>
 
 @endsection

@@ -21,7 +21,7 @@
       <div>
             <p class="text-sm text-gray-500">Klasifikasi Hukum</p>
             <p class="font-semibold">
-                {{ $pasal->judul ?? '-' }}
+                {{ $pasal->klasifikasiHukum->nama_klasifikasi ?? '-' }}
             </p>
         </div>
 

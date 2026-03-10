@@ -8,7 +8,6 @@
         Tambah Dasar Hukum
     </h2>
 
-
     {{-- ERROR VALIDATION --}}
     @if ($errors->any())
         <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
@@ -25,9 +24,9 @@
         @csrf
 
 
-        {{-- =====================================
-            KLASIFIKASI HUKUM
-        ====================================== --}}
+        {{-- ===============================
+        KLASIFIKASI HUKUM
+        =============================== --}}
         <div class="mb-6">
 
             <label class="font-semibold">
@@ -45,17 +44,16 @@
 
         </div>
 
-
         <hr class="my-6">
 
 
-        {{-- =====================================
-            WRAPPER PASAL
-        ====================================== --}}
+        {{-- ===============================
+        WRAPPER PASAL
+        =============================== --}}
         <div id="pasal-wrapper">
 
             {{-- PASAL PERTAMA --}}
-            <div class="pasal-item border rounded p-4 mb-6">
+            <div class="pasal-item border rounded p-4 mb-6" data-index="0">
 
                 <h3 class="pasal-title font-bold text-lg mb-3">
                     Pasal 1
@@ -63,12 +61,11 @@
 
                 <input
                     type="text"
-                    name="nomor_pasal"
+                    name="pasal[0][nomor_pasal]"
                     placeholder="Nomor Pasal"
                     class="w-full border rounded px-3 py-2 mb-4"
                     required
                 >
-
 
                 {{-- AYAT WRAPPER --}}
                 <div class="ayat-wrapper">
@@ -99,14 +96,12 @@
 
                 </div>
 
-
-                {{-- BUTTON TAMBAH AYAT --}}
                 <button
-                    type="button"
-                    onclick="tambahAyat(this)"
-                    class="mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                type="button"
+                onclick="tambahAyat(this)"
+                class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"
                 >
-                    + Tambah Ayat
+                + Tambah Ayat
                 </button>
 
             </div>
@@ -116,11 +111,11 @@
 
         {{-- BUTTON TAMBAH PASAL --}}
         <button
-            type="button"
-            onclick="tambahPasal()"
-            class="mb-6 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
+        type="button"
+        onclick="tambahPasal()"
+        class="mb-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
         >
-            + Tambah Pasal
+        + Tambah Pasal
         </button>
 
 
@@ -149,30 +144,38 @@
 
 
 
-{{-- =====================================
-    JAVASCRIPT DINAMIS
-===================================== --}}
+{{-- ======================================
+JAVASCRIPT DINAMIS
+====================================== --}}
 <script>
 
 let pasalIndex = 1;
 
 
-/* =================================
-   TAMBAH PASAL
-================================= */
+/* ==============================
+TAMBAH PASAL
+============================== */
 function tambahPasal(){
 
+    let wrapper = document.getElementById('pasal-wrapper');
+
+    let pasalItems = wrapper.querySelectorAll('.pasal-item');
+
+    let pasalIndex = pasalItems.length;
+
+    let nomorPasal = pasalIndex + 1;
+
     let html = `
-    <div class="pasal-item border rounded p-4 mb-6">
+    <div class="pasal-item border rounded p-4 mb-6" data-index="${pasalIndex}">
 
         <h3 class="pasal-title font-bold text-lg mb-3">
-            Pasal ${pasalIndex + 1}
+            Pasal ${nomorPasal}
         </h3>
 
         <input
             type="text"
             name="pasal[${pasalIndex}][nomor_pasal]"
-            placeholder="Nomor Pasal"
+            value="${nomorPasal}"
             class="w-full border rounded px-3 py-2 mb-4"
             required
         >
@@ -188,7 +191,7 @@ function tambahPasal(){
                 <input
                     type="text"
                     name="pasal[${pasalIndex}][ayat][0][nomor_ayat]"
-                    placeholder="Nomor Ayat"
+                    value="1"
                     class="w-full border rounded px-3 py-2 mb-2"
                     required
                 >
@@ -208,7 +211,7 @@ function tambahPasal(){
         <button
             type="button"
             onclick="tambahAyat(this)"
-            class="mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"
         >
             + Tambah Ayat
         </button>
@@ -224,29 +227,22 @@ function tambahPasal(){
     </div>
     `;
 
-    document
-        .getElementById('pasal-wrapper')
-        .insertAdjacentHTML('beforeend', html);
-
-    pasalIndex++;
-
+    wrapper.insertAdjacentHTML('beforeend', html);
 }
 
 
-
-/* =================================
-   TAMBAH AYAT
-================================= */
+/* ==============================
+TAMBAH AYAT
+============================== */
 function tambahAyat(btn){
 
     let pasal = btn.closest('.pasal-item');
+
     let wrapper = pasal.querySelector('.ayat-wrapper');
 
     let ayatIndex = wrapper.children.length;
 
-    let pasalIndex = pasal
-        .querySelector('input')
-        .name.match(/\d+/)[0];
+    let pasalIndex = pasal.dataset.index;
 
     let html = `
     <div class="ayat-item border rounded p-3 mb-3">
@@ -274,7 +270,7 @@ function tambahAyat(btn){
         <button
             type="button"
             onclick="hapusAyat(this)"
-            class="mt-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+            class="mt-2 bg-red-600 hover:bg-red-600 text-white px-3 py-1 rounded"
         >
             Hapus Ayat
         </button>
@@ -287,10 +283,9 @@ function tambahAyat(btn){
 }
 
 
-
-/* =================================
-   HAPUS PASAL
-================================= */
+/* ==============================
+HAPUS PASAL
+============================== */
 function hapusPasal(btn){
 
     btn.closest('.pasal-item').remove();
@@ -298,10 +293,9 @@ function hapusPasal(btn){
 }
 
 
-
-/* =================================
-   HAPUS AYAT
-================================= */
+/* ==============================
+HAPUS AYAT
+============================== */
 function hapusAyat(btn){
 
     btn.closest('.ayat-item').remove();
