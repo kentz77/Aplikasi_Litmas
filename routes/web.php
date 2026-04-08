@@ -62,6 +62,13 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/clients/{client}', [ClientController::class, 'update'])
         ->name('clients.update');
+
+    Route::get('/litmas/form', [LitmasController::class, 'form'])->name('litmas.form');
+
+    Route::get('/litmas/{jenis}', [LitmasController::class, 'pilihJenis'])
+    ->name('litmas.jenis');
+
+    Route::post('/litmas/preview', [LitmasController::class, 'preview'])->name('litmas.preview');
 });
 
 // ========================

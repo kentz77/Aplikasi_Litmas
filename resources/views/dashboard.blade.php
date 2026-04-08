@@ -6,7 +6,7 @@
     Dashboard
 </h1>
 
-<a href="{{ route('litmas.create') }}"
+<a href="{{ route('litmas.index') }}"
    class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium
           text-green-700 border border-green-600 rounded-md
           hover:bg-green-200 transition mb-6">

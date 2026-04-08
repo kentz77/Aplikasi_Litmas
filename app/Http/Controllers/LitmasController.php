@@ -10,13 +10,12 @@ class LitmasController extends Controller
      * Menampilkan daftar Litmas
      * (Dashboard / Arsip Litmas)
      */
-    public function index()
-    {
-        // nanti bisa ambil dari database
-        // $litmas = Litmas::latest()->get();
+    public function index(Request $request)
+{
+    $jenis = $request->jenis; // ambil dari URL ?jenis=anak
 
-        return view('litmas.index');
-    }
+    return view('litmas.index', compact('jenis'));
+}
 
     /**
      * Menampilkan halaman pilih jenis Litmas
@@ -105,4 +104,19 @@ class LitmasController extends Controller
             ->route('litmas.index')
             ->with('success', 'Litmas berhasil dihapus');
     }
+
+    public function form(Request $request)
+{
+    $jenis = $request->jenis_litmas;
+    $kategori = $request->kategori;
+
+    return view('litmas.form', compact('jenis', 'kategori'));
+}
+
+public function preview(Request $request)
+{
+    $data = $request->all();
+
+    return view('litmas.preview', compact('data'));
+}
 }
