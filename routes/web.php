@@ -20,14 +20,23 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// ========================
-// SEMUA USER LOGIN
-// ========================
+/*
+|--------------------------------------------------------------------------
+| AJAX (sementara di luar auth untuk debug)
+|--------------------------------------------------------------------------
+*/
+Route::get('/ajax/keluarga/{client}', [LitmasController::class, 'getKeluarga']);
+
+
+/*
+|--------------------------------------------------------------------------
+| SEMUA USER LOGIN
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -35,90 +44,60 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Litmas
-    Route::get('/litmas', [LitmasController::class, 'index'])
-        ->name('litmas.index');
-
-    Route::get('/litmas/create', [LitmasController::class, 'create'])
-        ->name('litmas.create');
-
-    Route::post('/litmas', [LitmasController::class, 'store'])
-        ->name('litmas.store');
-
-    // CLIENT (SEMUA LOGIN)
-    Route::get('/clients', [ClientController::class, 'index'])
-        ->name('clients.index');
-
-    Route::get('/clients/create', [ClientController::class, 'create'])
-        ->name('clients.create');
-
-    Route::post('/clients', [ClientController::class, 'store'])
-        ->name('clients.store');
-
-    Route::get('/clients/{client}', [ClientController::class, 'show'])
-        ->name('clients.show');
-
-    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])
-        ->name('clients.edit');
-
-    Route::put('/clients/{client}', [ClientController::class, 'update'])
-        ->name('clients.update');
+    Route::get('/litmas', [LitmasController::class, 'index'])->name('litmas.index');
+    Route::get('/litmas/create', [LitmasController::class, 'create'])->name('litmas.create');
+    Route::post('/litmas', [LitmasController::class, 'store'])->name('litmas.store');
 
     Route::get('/litmas/form', [LitmasController::class, 'form'])->name('litmas.form');
 
     Route::get('/litmas/{jenis}', [LitmasController::class, 'pilihJenis'])
-    ->where('jenis', 'anak|dewasa|awal')
-    ->name('litmas.jenis');
-
-    Route::get('ajax/penjamin/{client}', [GuarantorController::class, 'ajaxByClient']);
+        ->where('jenis', 'anak|dewasa|awal')
+        ->name('litmas.jenis');
 
     Route::post('/litmas/preview', [LitmasController::class, 'preview'])->name('litmas.preview');
 
-    Route::get('/ajax/keluarga/{client}', [LitmasController::class, 'getKeluarga']);
+    // CLIENT
+    Route::resource('clients', ClientController::class)->except(['destroy']);
+
+    // AJAX PENJAMIN (cukup 1 saja)
+    Route::get('ajax/penjamin/{client}', [GuarantorController::class, 'ajaxByClient'])
+        ->name('penjamin.ajax');
 });
 
-// ========================
-// USER BIASA
-// ========================
+
+/*
+|--------------------------------------------------------------------------
+| USER BIASA
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/litmas-saya', [LitmasController::class, 'myLitmas'])
         ->name('litmas.my');
 });
 
-// ========================
-// HANYA ADMIN
-// ========================
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
-    // CLIENT DELETE
     Route::delete('/clients/{client}', [ClientController::class, 'destroy'])
         ->name('clients.destroy');
-    
-    // Manajemen User
-    Route::get('/manajemen-user', [UserController::class, 'index'])
-        ->name('users.index');
 
-    Route::get('/manajemen-user/create', [UserController::class, 'create'])
-        ->name('users.create');
-
-    Route::post('/manajemen-user', [UserController::class, 'store'])
-        ->name('users.store');
-
-    Route::get('/manajemen-user/{user}/edit', [UserController::class, 'edit'])
-        ->name('users.edit');
-
-    Route::put('/manajemen-user/{user}', [UserController::class, 'update'])
-        ->name('users.update');
-
-    Route::delete('/manajemen-user/{user}', [UserController::class, 'destroy'])
-        ->name('users.destroy');
-
-    Route::post('/manajemen-user/{user}/reset-password', [UserController::class, 'resetPassword'])
-        ->name('users.reset-password');
-
-    // DASAR HUKUM
     Route::resource('pasal', PasalController::class);
 
+    Route::get('/manajemen-user', [UserController::class, 'index'])->name('users.index');
+    Route::get('/manajemen-user/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/manajemen-user', [UserController::class, 'store'])->name('users.store');
+    Route::get('/manajemen-user/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/manajemen-user/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/manajemen-user/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/manajemen-user/{user}/reset-password', [UserController::class, 'resetPassword'])
+        ->name('users.reset-password');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -129,21 +108,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('penjamin', GuarantorController::class);
 
-    Route::get(
-        'klien/{client}/penjamin',
-        [GuarantorController::class, 'byClient']
-    )->name('penjamin.byClient');
+    Route::get('klien/{client}/penjamin', [GuarantorController::class, 'byClient'])
+        ->name('penjamin.byClient');
 
-    Route::get(
-        'ajax/penjamin/{client}',
-        [GuarantorController::class, 'ajaxByClient']
-    )->name('penjamin.ajax');
-
-    Route::delete(
-        'penjamin/{penjamin}/force',
-        [GuarantorController::class, 'forceDelete']
-    )->name('penjamin.forceDelete');
+    Route::delete('penjamin/{penjamin}/force', [GuarantorController::class, 'forceDelete'])
+        ->name('penjamin.forceDelete');
 });
 
-// Auth routes
+// Auth
 require __DIR__.'/auth.php';

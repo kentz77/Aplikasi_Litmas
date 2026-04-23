@@ -179,23 +179,23 @@ public function preview(Request $request)
 
 public function getKeluarga($clientId)
 {
-    $data = Guarantor::where('client_id', $clientId)
-        ->select(
-            'id',
-            'nama',
-            'jenis',
-            'tempat_lahir',
-            'tanggal_lahir',
-            'agama',
-            'bangsa',
-            'suku',
-            'kewarganegaraan',
-            'pendidikan',
-            'pekerjaan',
-            'alamat',
-            'hubungan'
-        )
-        ->get();
+    $data = Guarantor::where('client_id', $clientId)->get();
+
+    // mapping jenis
+    $data = $data->map(function ($item) {
+
+        $hub = strtolower($item->hubungan_keluarga);
+
+        if (str_contains($hub, 'ayah')) {
+            $item->jenis = 'ayah';
+        } elseif (str_contains($hub, 'ibu')) {
+            $item->jenis = 'ibu';
+        } else {
+            $item->jenis = 'penjamin';
+        }
+
+        return $item;
+    });
 
     return response()->json($data);
 }
