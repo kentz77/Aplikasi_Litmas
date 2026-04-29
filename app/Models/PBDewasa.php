@@ -9,9 +9,13 @@ class PBDewasa extends Model
 {
     use HasFactory;
 
-    protected $table = 'PBDewasa';
+    protected $table = 'p_b_dewasas';
 
     protected $fillable = [
+
+    'client_id',
+    'user_id',
+    'guarantor_id',
 
     // ================================
     // NOTA DINAS

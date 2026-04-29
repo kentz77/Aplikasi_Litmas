@@ -19,15 +19,15 @@ class ExportController extends Controller
     {
         $request->validate([
             'client_id' => 'required',
-            'penjamin_id' => 'required',
-            'nama_perkara' => 'required',
+            'guarantor_id' => 'required',
+            'perkara' => 'required',
         ]);
 
         $litmas = PBDewasa::create([
             'client_id' => $request->client_id,
             'user_id' => auth()->id(),
-            'penjamin_id' => $request->penjamin_id,
-            'nama_perkara' => $request->nama_perkara,
+            'guarantor_id' => $request->guarantor_id,
+            'perkara' => $request->perkara,
         ]);
 
         // Relasi dasar hukum
@@ -74,7 +74,7 @@ class ExportController extends Controller
         return PBDewasa::with([
             'client',
             'user',
-            'penjamin',
+            'guarantor',
             'klasifikasiHukum',
             'families'
         ])->findOrFail($id);
@@ -106,20 +106,20 @@ class ExportController extends Controller
      * PREVIEW
      * ============================
      */
-    // public function preview($id)
-    // {
-    //     $litmas = $this->getLitmasData($id);
-    //     $perkara = $this->formatPerkara($litmas);
-
-    //     return view('litmas.preview', compact('litmas', 'perkara'));
-    // }
-
     public function preview($id)
-{
-    $litmas = $this->getLitmasData($id);
+    {
+        $litmas = $this->getLitmasData($id);
+        $perkara = $this->formatPerkara($litmas);
 
-    dd($litmas); // <- cek ini
-}
+        return view('litmas.preview', compact('litmas', 'perkara'));
+    }
+
+//     public function preview($id)
+// {
+//     $litmas = $this->getLitmasData($id);
+
+//     dd($litmas); // <- cek ini
+// }
 
     /**
      * ============================
