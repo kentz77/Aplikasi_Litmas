@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Family;
+use App\Models\Client;
+use App\Models\family;
 use App\Models\PBDewasa;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -23,9 +24,11 @@ class ExportController extends Controller
             'perkara' => 'required',
         ]);
 
+       $client = Client::findOrFail($request->client_id);
+
         $litmas = PBDewasa::create([
             'client_id' => $request->client_id,
-            'user_id' => auth()->id(),
+            'user_id' => $client->user_id, // 🔥 INI YANG BENAR
             'guarantor_id' => $request->guarantor_id,
             'perkara' => $request->perkara,
         ]);
@@ -52,8 +55,8 @@ class ExportController extends Controller
         foreach ($request->nama as $i => $nama) {
             if (!$nama) continue;
 
-            Family::create([
-                'litmas_id' => $litmasId,
+            family::create([
+                'p_b_dewasa_id' => $litmasId,
                 'nama' => $nama,
                 'jk' => $request->jk[$i] ?? null,
                 'usia' => $request->usia[$i] ?? null,
@@ -98,7 +101,7 @@ class ExportController extends Controller
             $dasarHukum = $dasar[0] ?? '-';
         }
 
-        return $litmas->nama_perkara . ' / ' . $dasarHukum;
+        return $litmas->perkara . ' / ' . $dasarHukum;
     }
 
     /**
@@ -179,8 +182,8 @@ class ExportController extends Controller
     private function setBasicValues($template, $litmas, $perkara)
     {
         // CLIENT
-        $template->setValue('nama_klien', $litmas->client->name ?? '-');
-        strtoupper($litmas->client->name ?? '-');
+        $template->setValue('nama_klien', $litmas->client->nama ?? '-');
+        strtoupper($litmas->client->nama ?? '-');
 
         // USER
         $template->setValue('nama_user', $litmas->user->name ?? '-');
@@ -190,7 +193,7 @@ class ExportController extends Controller
         $template->setValue('perkara_upper', strtoupper($perkara));
 
         // PENJAMIN
-        $template->setValue('nama_penjamin', $litmas->penjamin->nama ?? '-');
+        $template->setValue('nama_penjamin', $litmas->guarantor->nama ?? '-');
     }
 
     /**

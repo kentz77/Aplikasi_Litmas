@@ -186,12 +186,17 @@ public function guarantor()
     }
 
 public function klasifikasiHukum()
-    {
-        return $this->belongsTo(KlasifikasiHukum::class);
-    }
+{
+    return $this->belongsToMany(
+        KlasifikasiHukum::class,
+        'pb_dewasa_klasifikasi_hukum', // nama pivot table
+        'pb_dewasa_id',
+        'klasifikasi_hukum_id'
+    );
+}
 
     public function families()
 {
-    return $this->hasMany(Family::class, 'litmas_id');
+    return $this->hasMany(family::class, 'p_b_dewasa_id');
 }
 }
